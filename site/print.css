@@ -70,6 +70,13 @@ html, body {
 .markdown-body h4, .markdown-body h5, .markdown-body h6 {
   break-after: avoid;
 }
+/* a heading wrapped with its next block by keepHeadingsWithNext() in app.js (for Firefox) */
+.markdown-body .keep-together {
+  break-inside: avoid;
+}
+.markdown-body > .keep-together:first-child > :first-child {
+  margin-top: 0;
+}
 .markdown-body p { orphans: 3; widows: 3; }
 
 /* print long code and wide tables in full instead of clipping them */

@@ -434,25 +434,42 @@ els.preview.addEventListener('click', async (e) => {
 // ---------- PDF export (print → Save as PDF) ----------
 
 let titleBeforePrint = '';
-let closedDetails = [];
 let printing = false; // while true, diagrams are drawn in light colors for paper
 
+// The preview is changed for paper here, and re-rendered as normal after printing.
 window.addEventListener('beforeprint', () => {
   if (renderTimer) render(); // include the last few keystrokes
   titleBeforePrint = document.title;
   document.title = docName(); // becomes the PDF's default file name
-  closedDetails = [...els.preview.querySelectorAll('details.callout:not([open])')];
-  closedDetails.forEach((d) => (d.open = true)); // print folded callouts in full
+  els.preview.querySelectorAll('details.callout').forEach((d) => (d.open = true)); // folded callouts in full
+  els.preview.querySelector('.frontmatter')?.remove();
+  keepHeadingsWithNext();
 });
 window.addEventListener('afterprint', () => {
   document.title = titleBeforePrint;
-  closedDetails.forEach((d) => (d.open = false));
-  closedDetails = [];
-  if (printing) {
-    printing = false;
-    if (isDark()) render(); // back to dark diagrams
-  }
+  printing = false;
+  render();
 });
+
+// Keep each heading on the same page as the block after it. Chrome does this from
+// `break-after: avoid` alone; Firefox ignores that but honours `break-inside: avoid`,
+// so a heading (plus any headings right after it) is wrapped with its next block.
+// Blocks taller than about half a page are left out: moving them would leave a big gap.
+function keepHeadingsWithNext() {
+  const isHeading = (el) => el && /^H[1-6]$/.test(el.tagName);
+  const children = [...els.preview.children];
+  for (let i = 0; i < children.length; i++) {
+    if (!isHeading(children[i])) continue;
+    const group = [children[i]];
+    while (isHeading(children[i + 1])) group.push(children[++i]);
+    const next = children[i + 1];
+    if (next && next.offsetHeight < 600) group.push(children[++i]); // screen px, ≈ half a printed page
+    const box = document.createElement('div');
+    box.className = 'keep-together';
+    group[0].before(box);
+    box.append(...group);
+  }
+}
 
 async function exportPdf() {
   printing = true;

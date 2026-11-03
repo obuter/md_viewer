@@ -20,5 +20,9 @@ Things that broke once, or would break quietly if changed.
 - **Print uses light diagrams.** `exportPdf()` sets `printing` so diagrams re-render in the
   light theme before `window.print()`; ⌘P is routed through it too. The browser's own
   File → Print skips that step, so diagrams print in the current theme.
+- **Firefox orphans headings at page bottoms.** It ignores `break-after: avoid` on headings
+  (Chrome honours it). `beforeprint` wraps each heading with its next block in
+  `.keep-together` (`break-inside: avoid`, which Firefox does honour), skipping blocks taller
+  than ~600 screen px. `afterprint` re-renders to undo it and the other print-only changes.
 - **Scroll sync at the top.** When one pane is at the very top, the other is pinned to 0;
   interpolating would leave the preview 36 px down, past its padding.
