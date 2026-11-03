@@ -346,8 +346,9 @@ async function copyText(text) {
   area.style.cssText = 'position:fixed; top:0; left:0; opacity:0';
   document.body.appendChild(area);
   area.select();
-  document.execCommand('copy');
+  const ok = document.execCommand('copy');
   area.remove();
+  if (!ok) throw new Error('copy blocked');
 }
 
 // The rendered document without the app's own bits (copy buttons, properties box).

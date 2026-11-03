@@ -60,6 +60,10 @@ export function createScrollSync(cm, previewPane, isActive) {
 
   function previewFromEditor() {
     const info = cm.getScrollInfo();
+    if (info.top <= 0) {
+      previewPane.scrollTop = 0;
+      return;
+    }
     if (atBottom(info.top, info.clientHeight, info.height)) {
       previewPane.scrollTop = previewPane.scrollHeight;
       return;
@@ -77,6 +81,10 @@ export function createScrollSync(cm, previewPane, isActive) {
   function editorFromPreview() {
     const y = previewPane.scrollTop;
     const info = cm.getScrollInfo();
+    if (y <= 0) {
+      cm.scrollTo(null, 0);
+      return;
+    }
     if (atBottom(y, previewPane.clientHeight, previewPane.scrollHeight)) {
       cm.scrollTo(null, info.height);
       return;

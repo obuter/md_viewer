@@ -1,0 +1,24 @@
+# md_viewer — browser markdown editor/viewer, served as static files by nginx.
+# Nothing is stored on the server: each visitor's document lives in their browser.
+#
+# Bring up:  docker compose up -d --build
+# Logs:      docker compose logs -f md-viewer
+services:
+  md-viewer:
+    build: .
+    container_name: md-viewer
+    labels:
+      glance.name: md viewer
+      glance.icon: mdi:language-markdown
+      glance.url: http://10.0.1.11:8031
+      glance.description: Markdown editor and viewer
+    ports:
+      - "8031:8080"          # LAN/tailnet only
+    read_only: true
+    tmpfs:
+      - /tmp                 # nginx pid and temp files
+    cap_drop: [ALL]
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    restart: unless-stopped
