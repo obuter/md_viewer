@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>md viewer</title>
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="vendor/codemirror/codemirror.css">
+  <link rel="stylesheet" href="vendor/codemirror/dialog.css">
+  <link rel="stylesheet" href="vendor/katex/katex.min.css">
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="print.css" media="print">
+</head>
+<body>
+  <!-- Small SVG icons, referenced below with <use href="#i-..."> -->
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-sidebar" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16"/></symbol>
+    <symbol id="i-new" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></symbol>
+    <symbol id="i-open" viewBox="0 0 24 24"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V6a2 2 0 0 1 2-2h9"/></symbol>
+    <symbol id="i-theme" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/></symbol>
+    <symbol id="i-print" viewBox="0 0 24 24"><path d="M7 9V3h10v6"/><rect x="3" y="9" width="18" height="8" rx="2"/><path d="M7 14h10v7H7z"/></symbol>
+    <symbol id="i-chevron" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></symbol>
+  </svg>
+
+  <header class="toolbar">
+    <button id="btn-outline" class="btn icon" title="Show or hide the outline" aria-label="Toggle outline">
+      <svg><use href="#i-sidebar"/></svg>
+    </button>
+    <input id="doc-name" class="doc-name" value="untitled" spellcheck="false" aria-label="Document name" title="Document name (used for Save and PDF)">
+
+    <div class="toolbar-group file-actions">
+      <button id="btn-new" class="btn" title="New document"><svg><use href="#i-new"/></svg><span>New</span></button>
+      <button id="btn-open" class="btn" title="Open a .md file (⌘O)"><svg><use href="#i-open"/></svg><span>Open</span></button>
+      <button id="btn-save" class="btn" title="Download as .md (⌘S)"><svg><use href="#i-save"/></svg><span>Save</span></button>
+      <div class="menu">
+        <button id="btn-copy" class="btn" aria-haspopup="true" aria-expanded="false" title="Copy the whole document">
+          <svg><use href="#i-copy"/></svg><span>Copy</span><svg class="chevron"><use href="#i-chevron"/></svg>
+        </button>
+        <div id="copy-menu" class="menu-list" hidden>
+          <button data-copy="markdown">Markdown</button>
+          <button data-copy="rich">Rich text <small>formatted, for email or docs</small></button>
+          <button data-copy="html">HTML source</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="segmented" role="group" aria-label="View">
+      <button data-view="editor">Editor</button>
+      <button data-view="split">Split</button>
+      <button data-view="preview">Preview</button>
+    </div>
+
+    <button id="btn-theme" class="btn icon" title="Light / dark" aria-label="Toggle theme">
+      <svg><use href="#i-theme"/></svg>
+    </button>
+    <button id="btn-pdf" class="btn primary" title="Export as PDF (print → Save as PDF)">
+      <svg><use href="#i-print"/></svg><span>Export PDF</span>
+    </button>
+    <input type="file" id="file-input" accept=".md,.markdown,.mdown,.txt,text/markdown,text/plain" hidden>
+  </header>
+
+  <div class="layout">
+    <aside id="outline" class="outline" aria-label="Outline">
+      <div class="outline-head">Outline</div>
+      <nav id="outline-tree" class="outline-tree"></nav>
+      <div id="stats" class="outline-foot"></div>
+    </aside>
+    <div id="outline-backdrop" class="outline-backdrop"></div>
+
+    <main id="main" class="main view-split">
+      <section id="editor-pane" class="pane editor-pane">
+        <textarea id="editor"></textarea>
+      </section>
+      <section id="preview-pane" class="pane preview-pane">
+        <article id="preview" class="markdown-body"></article>
+      </section>
+    </main>
+  </div>
+
+  <div id="drop-overlay" class="drop-overlay" hidden><div>Drop a .md file to open it</div></div>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="vendor/markdown-it/markdown-it.min.js"></script>
+  <script src="vendor/markdown-it/footnote.min.js"></script>
+  <script src="vendor/markdown-it/task-lists.min.js"></script>
+  <script src="vendor/katex/katex.min.js"></script>
+  <script src="vendor/markdown-it/texmath.js"></script>
+  <script src="vendor/dompurify/purify.min.js"></script>
+  <script src="vendor/highlight/highlight.min.js"></script>
+  <script src="vendor/codemirror/codemirror.js"></script>
+  <script src="vendor/codemirror/overlay.js"></script>
+  <script src="vendor/codemirror/xml.js"></script>
+  <script src="vendor/codemirror/markdown.js"></script>
+  <script src="vendor/codemirror/gfm.js"></script>
+  <script src="vendor/codemirror/yaml.js"></script>
+  <script src="vendor/codemirror/yaml-frontmatter.js"></script>
+  <script src="vendor/codemirror/continuelist.js"></script>
+  <script src="vendor/codemirror/active-line.js"></script>
+  <script src="vendor/codemirror/dialog.js"></script>
+  <script src="vendor/codemirror/searchcursor.js"></script>
+  <script src="vendor/codemirror/search.js"></script>
+  <!-- Mermaid (~3.5 MB) is loaded by render.js only when a document has a diagram. -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

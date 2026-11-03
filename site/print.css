@@ -1,0 +1,85 @@
+/* print.css — what "Export PDF" prints: only the rendered document, in light colors. */
+
+@page {
+  margin: 18mm 16mm;
+}
+
+/* light colors even when the app is in dark mode (same specificity as the dark rules, loaded later) */
+:root, :root:not([data-theme="light"]), :root[data-theme="dark"] {
+  --bg: #ffffff;
+  --panel: #ffffff;
+  --text: #1f2328;
+  --muted: #555c63;
+  --faint: #7a8188;
+  --border: #d9d9d6;
+  --link: #0a64a4;
+  --code-bg: #f4f4f2;
+  --code-text: #9a3d14;
+  --syn-keyword: #b3245b;
+  --syn-string: #2f7a2f;
+  --syn-number: #0b6e99;
+  --syn-comment: #7a8188;
+  --syn-title: #7046b8;
+  --syn-attr: #a15c00;
+  --c-note: #2f6fdb;
+  --c-tip: #1f8f4e;
+  --c-warning: #c27400;
+  --c-danger: #cf2f3f;
+  --c-question: #8a4fd0;
+  --c-quote: #7b828a;
+  color-scheme: light;
+}
+
+html, body {
+  height: auto;
+  overflow: visible;
+  background: #fff;
+  display: block;
+}
+
+/* hide the app, keep the document */
+.toolbar, .outline, .outline-backdrop, .editor-pane, .drop-overlay, .toast,
+.code-head, .frontmatter, .empty-hint {
+  display: none !important;
+}
+.layout, .main, .main.view-editor .preview-pane, .preview-pane {
+  display: block !important;
+  height: auto !important;
+  overflow: visible !important;
+  background: none;
+}
+
+.markdown-body {
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  font-size: 10.5pt;
+  line-height: 1.55;
+}
+.markdown-body h1 { font-size: 20pt; }
+.markdown-body h2 { font-size: 15pt; }
+.markdown-body h3 { font-size: 12.5pt; }
+
+/* keep blocks in one piece, headings with what follows them */
+.markdown-body pre, .markdown-body .code-block, .markdown-body table, .markdown-body .callout,
+.markdown-body blockquote, .markdown-body img, .markdown-body pre.mermaid,
+.markdown-body section:has(> eqn) {
+  break-inside: avoid;
+}
+.markdown-body h1, .markdown-body h2, .markdown-body h3,
+.markdown-body h4, .markdown-body h5, .markdown-body h6 {
+  break-after: avoid;
+}
+.markdown-body p { orphans: 3; widows: 3; }
+
+/* print long code and wide tables in full instead of clipping them */
+.markdown-body pre { overflow: visible; white-space: pre-wrap; overflow-wrap: anywhere; }
+.markdown-body table { display: table; width: auto; overflow: visible; }
+
+.markdown-body a { color: var(--link); }
+
+/* print backgrounds (code blocks, callouts, table headers) */
+* {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
