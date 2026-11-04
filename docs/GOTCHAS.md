@@ -8,6 +8,10 @@ Things that broke once, or would break quietly if changed.
 - **DOMPurify runs with `SANITIZE_DOM: false`.** With the default, it drops heading ids that
   match a document property (`title`, `images`, `links`…), which breaks the outline and
   `[text](#heading)` links.
+- **Never hide textareas inside the editor pane.** CodeMirror takes keystrokes through its
+  own hidden `<textarea>`. A rule like `.editor-pane textarea { display: none }` made the
+  editor read-only; only `#editor` (the original) may be hidden. Test editing with real
+  typing, not `cm.setValue()`.
 - **The outline passes copies of headings.** Look headings up by `id`, never with
   `indexOf(heading)`.
 - **No secure context on the LAN.** The app is served over plain http, so

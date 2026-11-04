@@ -295,7 +295,8 @@ li.collapsed > .outline-row .outline-caret svg { transform: rotate(-90deg); }
 .outline-backdrop { display: none; }
 
 /* ---------- Editor (CodeMirror 5) ---------- */
-.editor-pane textarea { display: none; }
+/* only the original textarea: CodeMirror's own hidden input textarea must stay focusable */
+#editor { display: none; }
 .CodeMirror {
   height: 100%;
   background: var(--editor-bg);
