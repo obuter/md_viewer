@@ -11,7 +11,7 @@ services:
       glance.name: md viewer
       glance.icon: mdi:language-markdown
       glance.url: http://10.0.1.11:8031
-      glance.description: Markdown editor and viewer
+      glance.description: Markdown editor
     ports:
       - "8031:8080"          # LAN/tailnet only
     read_only: true
